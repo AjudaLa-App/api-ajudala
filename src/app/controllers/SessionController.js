@@ -1,34 +1,21 @@
 import jwt from 'jsonwebtoken';
-import User from '../models/User';
+import { decryptAndCompareIfIsEqual } from '../../utils/crypt';
+import Org from '../schemas/Org';
 import authConfig from '../../config/auth';
-import * as Yup from 'yup';
 
 class SessionController {
   async store(req, res) {
-    const schema = Yup.object().shape({
-      email: Yup.string()
-        .email()
-        .required(),
-      password: Yup.string().required(),
-    });
-
-    if (!(await schema.isValid(req.body))) {
-      return res.status(400).json({ error: 'validation fails  ' });
-    }
-
     const { email, password } = req.body;
+    const org = await Org.findOne({ email });
 
-    const user = await User.findOne({ where: { email } });
-
-    if (!user) return res.status(401).json({ error: 'user not found' });
-
-    if (!(await user.checkPassword(password))) {
-      return res.status(401).json({ error: 'password does not match' });
+    if (!org)
+      return res.status(401).json({ error: 'org/password are wrongs.' });
+    if (!decryptAndCompareIfIsEqual(password, org.password_hash)) {
+      return res.status(401).json({ error: 'org/password are wrongs.' });
     }
-
-    const { id, name } = user;
+    const { id, name } = org;
     return res.json({
-      user: {
+      org: {
         id,
         name,
         email,

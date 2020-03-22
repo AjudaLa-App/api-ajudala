@@ -1,5 +1,5 @@
-import mailConfig from '../config/mail';
 import nodemailer from 'nodemailer';
+import mailConfig from '../config/mail';
 
 class Mail {
   constructor() {

@@ -1,45 +1,44 @@
 import mongoose, { Schema } from 'mongoose';
-import { encrypt } from '../../utils/crypt';
 
 const ProjectSchema = new Schema(
   {
-    name: {
-      type: String,
-      required: true,
-      unique: true,
-    },
-    address: {
-      type: String,
+    orgId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Org',
       required: true,
     },
     state: {
       type: String,
       required: true,
     },
-    city: {
+    name: {
       type: String,
       required: true,
     },
-    volunteers: [
-      {
-        type: Object,
-        required: true,
-      },
-    ],
+    address: {
+      type: String,
+      required: false,
+    },
+    description: {
+      type: String,
+      required: false,
+    },
   },
   {
     timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   }
 );
 
-ProjectSchema.pre('save', async function save(done) {
-  if (this.isModified('password_hash')) {
-    this.password_hash = await encrypt(this.password_hash, 10);
-  }
-  done();
+ProjectSchema.virtual('org', {
+  ref: 'Org',
+  localField: 'orgId',
+  foreignField: '_id',
+  justOne: true,
 });
 
-const Project = mongoose.model('User', ProjectSchema);
+const Project = mongoose.model('Project', ProjectSchema);
 
 Project.init().then(() => {
   // eslint-disable-next-line no-console

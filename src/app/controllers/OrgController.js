@@ -1,60 +1,97 @@
 import Org from '../schemas/Org';
+import { removeUndefinedFields } from '../../utils/object';
 
 class OrgController {
   async store(req, res) {
-    const { email, name, password: password_hash } = req.body;
+    const {
+      email,
+      name,
+      password: password_hash,
+      cpf,
+      cpnj,
+      zipcode,
+      address,
+      state,
+      city,
+      phone,
+    } = req.body;
     const orgExists = await Org.findOne({
       email,
     });
     if (orgExists) {
-      return res.status(409).json({ error: 'Org already exists.' });
+      if (orgExists.name === name && orgExists.zipcode === zipcode)
+        return res.status(409).json({ error: 'Org already exists.' });
+      return res.status(409).json({ error: 'This email is not available' });
     }
     const { id } = await Org.create({
       email,
       name,
       password_hash,
+      cpf,
+      cpnj,
+      zipcode,
+      address,
+      state,
+      city,
+      phone,
     });
+
     return res.json({
+      ...req.body,
       id,
-      name,
-      email,
     });
   }
 
-  async update() {
-    // const schema = Yup.object().shape({
-    //   name: Yup.string(),
-    //   email: Yup.string().email(),
-    //   oldPassword: Yup.string().min(6),
-    //   password: Yup.string()
-    //     .min(6)
-    //     .when('oldPassword', (oldPassword, field) => {
-    //       oldPassword ? field.required() : field;
-    //     }),
-    //   confirmPassword: Yup.string().when('password', (password, field) => {
-    //     password ? field.required().oneOf([Yup.ref('password')]) : field;
-    //   }),
-    // });
-    // if (!(await schema.isValid(req.body))) {
-    //   return res.status(400).json({ error: 'validation fails' });
-    // }
-    // const { email, oldPassword } = req.body;
-    // const Org = await Org.findByPk(req.OrgId);
-    // if (email !== Org.email) {
-    //   const OrgExists = await Org.findOne({ where: { email } });
-    // }
-    // if (OrgExists) {
-    //   return res.status(400).json({ error: 'Org already exists' });
-    // }
-    // if (oldPassword && !(await Org.checkPassword(oldPassword))) {
-    //   return res.status(401).json({ error: 'password does not exists' });
-    // }
-    // const { id, name, provider } = await Org.update(req.body);
-    // return res.json({
-    //   id,
-    //   name,
-    //   provider,
-    // });
+  async update(req, res) {
+    const {
+      email,
+      oldPassword,
+      confirmPassword,
+      password,
+      name,
+      address,
+      zipcode,
+      state,
+      city,
+      phone,
+      cpf,
+      cnpj,
+    } = req.body;
+
+    const obj = {
+      email,
+      oldPassword,
+      confirmPassword,
+      password,
+      name,
+      address,
+      zipcode,
+      state,
+      city,
+      phone,
+      cpf,
+      cnpj,
+    };
+
+    const org = await Org.findById(req.orgId);
+    // console.log('org', org);
+    // console.log('orgId', req.orgId);
+    if (email !== org.email) {
+      const orgExists = await Org.findOne({ where: { email } });
+      if (orgExists)
+        return res.status(409).json({ error: 'This email is not available.' });
+    }
+
+    if (oldPassword && !(await org.checkPassword(oldPassword))) {
+      return res.status(401).json({ error: 'Password is wrong.' });
+    }
+    const newBody = removeUndefinedFields(obj);
+
+    const { id } = await org.updateOne(newBody);
+    return res.json({
+      id,
+      ...obj,
+    });
   }
 }
 

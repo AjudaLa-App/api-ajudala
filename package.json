@@ -1,6 +1,6 @@
 {
   "name": "backend",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "main": "index.js",
   "engines": {
     "node": "12.16.1"
@@ -17,15 +17,21 @@
   },
   "license": "MIT",
   "dependencies": {
+    "@sentry/node": "5.14.2",
     "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
     "date-fns": "^2.11.0",
     "date-fns-tz": "^1.0.10",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
+    "express-async-errors": "^3.1.1",
+    "express-rate-limit": "^5.1.1",
+    "helmet": "^3.21.3",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.9.5",
     "multer": "^1.4.2",
     "nodemailer": "^6.4.6",
+    "youch": "^2.0.10",
     "yup": "^0.28.3"
   },
   "devDependencies": {

@@ -10,8 +10,8 @@ export async function encrypt(value, force = 10) {
   }
 }
 
-export function decryptAndCompareIfIsEqual(frist_value, second_value) {
-  const result = bcrypt.compare(frist_value, second_value);
+export async function decryptAndCompareIfIsEqual(frist_value, second_value) {
+  const result = await bcrypt.compare(frist_value, second_value);
 
   return result;
 }

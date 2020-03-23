@@ -1,5 +1,4 @@
 import jwt from 'jsonwebtoken';
-import { decryptAndCompareIfIsEqual } from '../../utils/crypt';
 import Org from '../schemas/Org';
 import authConfig from '../../config/auth';
 
@@ -10,17 +9,17 @@ class SessionController {
 
     if (!org)
       return res.status(401).json({ error: 'org/password are wrongs.' });
-    if (!decryptAndCompareIfIsEqual(password, org.password_hash)) {
+    if (!(await org.checkPassword(password))) {
       return res.status(401).json({ error: 'org/password are wrongs.' });
     }
-    const { id, name } = org;
+    const { id, name, state } = org;
     return res.json({
       org: {
         id,
         name,
         email,
       },
-      token: jwt.sign({ id }, authConfig.secret, {
+      token: jwt.sign({ id, email, state }, authConfig.secret, {
         expiresIn: authConfig.expires,
       }),
     });

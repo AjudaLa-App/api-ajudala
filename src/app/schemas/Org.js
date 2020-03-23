@@ -1,5 +1,6 @@
+/* eslint-disable no-underscore-dangle */
 import mongoose, { Schema } from 'mongoose';
-import { encrypt } from '../../utils/crypt';
+import { encrypt, decryptAndCompareIfIsEqual } from '../../utils/crypt';
 
 const OrgSchema = new Schema(
   {
@@ -11,6 +12,34 @@ const OrgSchema = new Schema(
     name: {
       type: String,
       required: true,
+    },
+    cpf: {
+      type: String,
+      required: false,
+    },
+    cnpj: {
+      type: String,
+      required: false,
+    },
+    zipcode: {
+      type: String,
+      required: true,
+    },
+    address: {
+      type: String,
+      required: true,
+    },
+    state: {
+      type: String,
+      required: true,
+    },
+    city: {
+      type: String,
+      required: true,
+    },
+    phone: {
+      type: String,
+      required: false,
     },
     password_hash: {
       type: String,
@@ -28,6 +57,18 @@ OrgSchema.pre('save', async function save(done) {
   }
   done();
 });
+
+OrgSchema.pre('updateOne', async function save(done) {
+  if (this._update.oldPassword && this._update.password) {
+    // console.log(' this ', this);
+    this._update.password_hash = await encrypt(this._update.password, 10);
+  }
+  done();
+});
+
+OrgSchema.methods.checkPassword = async function checkPassword(password) {
+  return decryptAndCompareIfIsEqual(password, this.password_hash);
+};
 
 const Org = mongoose.model('Org', OrgSchema);
 

@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+  mongo:
+    image: mongo
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME: admin
+      - MONGO_INITDB_ROOT_PASSWORD: admin
+      - MONGO_INITDB_DATABASE: mongo-database
+    ports:
+      - '27017:27017'
+    volumes:
+      - '.dockerdata/mongo:/var/lib/mongo'
+    networks:
+      - mongo-compose-network
+
+networks:
+  mongo-compose-network:
+    driver: bridge
